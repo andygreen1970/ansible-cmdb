@@ -1,0 +1,490 @@
+SELECT * FROM otrs.CMDB_Servers;
+
+host_id Class  Number      Name          DeplState Landscape PrivateCloud IS       Component
+86172   Server 93247006211 vmw-inf-edge2 Operation PROD      0            Exchange Edge
+
+Type Role    vDCClusName_id IP CPUcount RAMcount TotalSize owner Link
+App  Standby 62761             4        12       113.00    rem   ...ITSMConfigItemZoom
+
+Поля
+host_id         bigint(20)      unsigned NO  0
+Class           mediumtext               YES
+Number          bigint(21)      unsigned YES
+Name            mediumtext               YES
+DeplState       mediumtext               YES
+Landscape       mediumtext               YES
+PrivateCloud    bigint(21)      unsigned YES
+IS              mediumtext               YES
+Component       mediumtext               YES
+Type            mediumtext               YES
+Role            mediumtext               YES
+vDCClusName_id  bigint(21)      unsigned YES
+IP              mediumtext               YES
+CPUcount        bigint(21)      unsigned YES
+RAMcount        bigint(21)      unsigned YES
+TotalSize       decimal(15,2)            YES
+owner           varchar(255)             YES
+Link            varchar(101)             YES
+
+
+Описание класса
+
+[
+  {
+        Key => 'Owner',
+        Name => 'Владелец',
+        Searchable => 1,
+        Input => {
+        Type => 'Customer',
+  Required => 1,
+        },
+    },
+{
+         Key => 'LandscapeArea',
+         Name => 'Ландшафт',
+         Searchable => 1,
+         Input => {
+             Type => 'GeneralCatalog',
+             Class => 'ITSM::ConfigItem::Landscape',
+    Required => 0,
+         },
+     },
+
+{
+          Key => 'IS',
+          Name => 'Система',
+          Searchable => 1,
+
+          Input => {
+              Type => 'GeneralCatalog',
+              Class => 'ITSM::ConfigItem::IS',
+              Required => 0,
+          },
+      },
+{
+         Key => 'Component',
+         Name => 'Подсистема',
+         Searchable => 1,
+         Input => {
+             Type => 'GeneralCatalog',
+             Class => 'ITSM::ConfigItem::Landscape::Component',
+    Required => 0,
+         },
+     },
+
+{
+          Key => 'Type',
+          Name => 'Тип\Назначение',
+          Searchable => 1,
+
+          Input => {
+              Type => 'GeneralCatalog',
+              Class => 'ITSM::ConfigItem::ServerType',
+              Required => 0,
+          },
+      },
+
+{
+         Key => 'Role',
+         Name => 'Роль',
+         Searchable => 1,
+
+         Input => {
+             Type => 'GeneralCatalog',
+             Class => 'ITSM::ConfigItem::Role',
+    Required => 0,
+         },
+     },
+
+{
+        Key => 'PrivateCloud',
+        Name => 'Location',
+        Searchable => 1,
+        Input => {
+            Type => 'GeneralCatalog',
+            Class => 'ITSM::ConfigItem::VirtualMachine::PrivateCloud',
+            Required => 0,
+         },
+     },
+
+{
+         Key => 'ZabbixGroup',
+         Name => 'Группа в Zabbix',
+         Searchable => 1,
+         Input => {
+             Type => 'GeneralCatalog',
+             Class => 'ITSM::ConfigItem::ZabbixGroup',
+             Required => 0,
+         },
+     },
+
+    {
+
+         Key => 'ObjectCMDB',
+         Name => 'Код объекта в CMDB',
+         Searchable => 1,
+         Input => {
+           Type => 'CIClassReference',
+           ReferencedCIClassName => 'Географический объект',
+
+           ReferencedCIClassLinkType => 'DependsOn',
+           SearchInputType => 'AutoComplete',
+
+         },
+     },
+
+{
+        Key => 'vDCClusName',
+        Name => 'vDC\ClusterName (Virtual)',
+        Searchable => 1,
+
+        Input => {
+         Type => 'CIClassReference',
+         ReferencedCIClassName => 'vDC',
+         ReferencedCIClassLinkType => 'RelevantTo',
+         SearchInputType => 'AutoComplete',
+         Required => 0,
+        },
+
+
+    },
+
+{
+         Key => 'Partof',
+         Name => 'Входит в состав',
+         Searchable => 0,
+         Input => {
+            Type => 'Text',
+            Size => 1,
+            MaxLength => 1,
+
+         },
+
+Sub => [
+{
+        Key => 'SDS',
+        Name => 'SDS (Virtual Storage)',
+        Searchable => 1,
+
+        Input => {
+         Type => 'CIClassReference',
+         ReferencedCIClassName => 'SDS',
+         ReferencedCIClassLinkType => 'RelevantTo',
+         SearchInputType => 'AutoComplete',
+         Required => 0,
+        },
+
+
+    },
+],
+},
+
+
+
+
+{
+    Key => 'IP',
+    Name => 'IP Address',
+    Searchable => 1,
+    Input => {
+                Type => 'Text',
+                Size => 50,
+                MaxLength => 100,
+       },
+  CountMin => 0,
+                CountMax => 20,
+                CountDefault => 0,
+},
+{
+        Key => 'CPUcount',
+        Name => 'CPU threads',
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+            Required => 0,
+        },
+    },
+{
+        Key => 'RAMcount',
+        Name => 'RAM, GB ',
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+            Required => 0,
+        },
+    },
+{
+        Key => 'TotalSize',
+        Name => 'Allocated disk space, GB',
+        Searchable => 1,
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+            Required => 0,
+        },
+    },
+{
+        Key => 'OS',
+        Name => 'OS',
+        Searchable => 1,
+
+        Input => {
+         Type => 'CIClassReference',
+         ReferencedCIClassName => 'OS',
+         ReferencedCIClassLinkType => 'RelevantTo',
+         SearchInputType => 'AutoComplete',
+         Required => 0,
+        },
+    },
+{
+        Key => 'NIC_count',
+        Name => 'Количество сетевых интерфейсов',
+        Required => 1,
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+            Required => 0,
+        },
+    },
+
+{
+        Key => 'NIC_MAC',
+        Name => 'NIC_MAC',
+        Searchable => 1,
+        Input => {
+                Type => 'Text',
+                Size => 50,
+                MaxLength => 100,
+    },
+        CountMin => 0,
+                      CountMax => 20,
+                      CountDefault => 0,
+        Sub => [
+{
+        Key => 'NICtype',
+        Name => 'NIC type',
+        Searchable => 1,
+        Input => {
+            Type => 'GeneralCatalog',
+            Class => 'ITSM::ConfigItem::VirtualMachine::NICtype',
+        },
+},
+{
+        Key => 'NICvlan',
+        Name => 'NIC VLAN',
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+            Required => 0,
+        },
+    },
+
+],
+},
+{
+        Key => 'FQDN',
+        Name => 'FQDN',
+        Required => 1,
+        Searchable => 1,
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+        },
+    },
+{
+  Key => 'ClusterIP',
+        Name => 'Corosync/Cluster IP',
+        Required => 1,
+        Searchable => 1,
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+            Required => 0,
+        },
+    },
+{
+        Key => 'Generation',
+        Name => 'Generation',
+        Searchable => 1,
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+            Required => 0,
+        },
+    },
+{
+         Key => 'CreationDate',
+         Name => 'Дата создания VM',
+         Required => 0,
+         Searchable => 1,
+         Input => {
+             Type => 'Date',
+             Required => 0,
+             YearPeriodPast => 20,
+             YearPeriodFuture => 10,
+         },
+         CountMin => 0,
+         CountMax => 1,
+         CountDefault => 0,
+     },
+
+{
+    Key => 'vSAN_WWPN',
+    Name => 'vSAN WWPN',
+    Searchable => 1,
+    Input => {
+                Type => 'Text',
+                Size => 50,
+                MaxLength => 100,
+       },
+  CountMin => 0,
+                CountMax => 4,
+                CountDefault => 0,
+},
+{
+        Key => 'vHDDName',
+        Name => 'vHDD Name',
+        Input => {
+                Type => 'Text',
+                Size => 50,
+                MaxLength => 100,
+    },
+        CountMin => 0,
+                      CountMax => 20,
+                      CountDefault => 0,
+        Sub => [
+{
+        Key => 'vHDDProfile',
+        Name => 'vHDD Profile',
+        Searchable => 1,
+        Input => {
+            Type => 'GeneralCatalog',
+            Class => 'ITSM::ConfigItem::VirtualMachine::HDDprofile',
+        },
+},
+{
+        Key => 'vHDDSize',
+        Name => 'vHDD Size, GB',
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+            Required => 0,
+        },
+    },
+{
+        Key => 'vHDDtype',
+        Name => 'vHDD Type',
+        Searchable => 1,
+        Input => {
+            Type => 'GeneralCatalog',
+            Class => 'ITSM::ConfigItem::VirtualMachine::Type',
+        },
+},
+   {
+        Key => 'DatastoreName',
+        Name => 'Datastore',
+        Input => {
+                Type => 'GeneralCatalog',
+            Class => 'ITSM::ConfigItem::VirtualMachine::Datastore',    },
+
+},
+],
+},
+{
+        Key => 'GUID',
+        Name => 'GUID',
+        Required => 1,
+        Searchable => 1,
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+            Required => 0,
+        },
+    },
+
+
+{
+        Key => 'UcloudID',
+        Name => 'UcloudID',
+        Required => 1,
+        Searchable => 1,
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+            Required => 0,
+        },
+    },
+
+{
+        Key => 'Description',
+        Name => 'Description',
+        Searchable => 1,
+        Input => {
+            Type => 'Text',
+            Size => 50,
+            MaxLength => 100,
+            Required => 0,
+        },
+    },
+{
+         Key => 'RevisionDate',
+         Name => 'Дата сверки',
+         Required => 0,
+         Searchable => 1,
+         Input => {
+             Type => 'Date',
+             Required => 0,
+             YearPeriodPast => 20,
+             YearPeriodFuture => 10,
+         },
+         CountMin => 0,
+         CountMax => 1,
+         CountDefault => 0,
+     },
+
+{
+          Key => 'Note',
+          Name => 'Заметка',
+          Searchable => 1,
+          Input => {
+              Type => 'TextArea',
+              Required => 1,
+          },
+          CountMin => 0,
+          CountMax => 1,
+          CountDefault => 0,
+      },
+];
+
+
+
+
+
+Для поля
+
+{
+        Key => 'OS',
+        Name => 'OS',
+        Searchable => 1,
+
+        Input => {
+         Type => 'CIClassReference',
+         ReferencedCIClassName => 'OS',
+         ReferencedCIClassLinkType => 'RelevantTo',
+         SearchInputType => 'AutoComplete',
+         Required => 0,
+        },
+    },
+
+Требуется модуль  ITSM-CIAttributeCollection
