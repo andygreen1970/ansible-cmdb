@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 DOCUMENTATION = '''
-    name: cmbd
+    name: cmdb
     plugin_type: inventory
     version_added: "0.1a"
     short_description: Uses CMDB to find hosts to target
@@ -19,16 +19,37 @@ DOCUMENTATION = '''
             required: True
             choices: ['cmdb']
         host_field:
-            description: Host to target.
+            description: Host field name to ansible target.
             required: True
-        config:
-            description: Config for connection.
+        type:
+            description: CMDB database type.
+            default: MYSQL
+            choices: ['MYSQL']
+        host:
+            description: CMDB database host.
+            default: localhost
+        port:
+            description: CMDB database port.
+            default: 3306
+            type: string
+        user:
+            description: CMDB database user.
+            default: root
+        password:
+            description: CMDB database password.
+            default: ''
+        view:
+            description: CMDB database dataset.
+            required: True
         where:
-            description: Filter for SQL.
+            description: Filter for SQL format.
+            default: ''
         groups:
-            description: Group list.
-        vars:
-            description: Vars dictionary for host and group.
+            description: Ansible host group list.
+        groupvars:
+            description: Field list for group vars.
+        hostvars:
+            description: Field list for host vars.
 '''
 
 
@@ -49,32 +70,29 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
         # todo Добавить настройку класса Cmdb
         super(InventoryModule, self).__init__()
-        self._yaml = {'config':
-                          {'host': 'localhost',
-                           'password': None,
-                           'port': 3306,
-                           'type': 'MYSQL',
-                           'user': 'root',
-                           'view': 'otrs.CMDB_Servers'
-                          },
-                      'host_field': None,
-                      'where': None,
-                      'groups': ['Role', 'Class'],
-                      'vars':
-                          {
-                            'group': [],
-                            'host': []
-                          }
-                      }
+        self.__cmdb_config = {
+        'host': 'localhost',
+        'password': '',
+        'port': '3306',
+        'type': 'MYSQL',
+        'user': 'root',
+        'view': '',
+        'where': ''
+        }
+        self.__cmdb_fieldset = {
+        'host_field': '',
+        'groups': [],
+        'groupvars': [],
+        'hostvars': []
+        }
+
     def verify_file(self, path):
 
         valid = False
         if super(InventoryModule, self).verify_file(path):
             file_name, ext = os.path.splitext(path)
-
             if not ext or ext in C.YAML_FILENAME_EXTENSIONS:
                 valid = True
-
         return valid
 
     def parse(self, inventory, loader, path, cache=False):
@@ -83,24 +101,50 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
         self._read_config_data(path)
 
-        for option in self._yaml:
-            try:
-                self._yaml[option] = self.get_option(option)
-            except IndexError:
+        for key in self._options:
+            if key in self.__cmdb_config :
+                if isinstance(self._options[key], type(self.__cmdb_config[key])):
+                    self.__cmdb_config[key] = self._options[key]
+                else:
+                    raise AnsibleParserError('Тип опции {} должен быть {}, а не {}'.format(key,
+                                                    type(self.__cmdb_config[key]), type(self._options[key])))
+            if key in self.__cmdb_fieldset :
+                if isinstance(self._options[key], type(self.__cmdb_fieldset[key])):
+                    self.__cmdb_fieldset[key] = self._options[key]
+                else:
+                    raise AnsibleParserError('Тип опции {} должен быть {}, а не {}'.format(key,
+                                                    type(self.__cmdb_config[key]), type(self._options[key])))
 
+        fields = list()
+        for key in self.__cmdb_fieldset:
+            if isinstance(self.__cmdb_fieldset[key], list):
+                fields += self.__cmdb_fieldset[key]
+            else:
+                # todo Проверить на иттерабельность
+                fields.append(self.__cmdb_fieldset[key])
 
-        groups = InventoryModule.option2list(self.get_option('groups'))
-        vars = InventoryModule.option2dict(self.get_option('vars'))
+        cmdb = connector.Cmdb(config=self.__cmdb_config, fields=set(fields))
 
-        fields = vars['group']+vars['host']+groups
-        fields.append(self.get_option('host_field'))
-        # todo Рассмотреть другие способы удаления дублей из списка
-        fields = set(fields)
+        groups = list()
 
-        cmdb = connector.Cmdb(config=InventoryModule.option2dict(self.get_option('config')),
-                              fields=fields)
         for row in cmdb:
-            pass
+            group_temp = list()
+            for fieldname in self.__cmdb_fieldset['groups']:
+                group_temp.append(row[fieldname])
+                if row[fieldname] not in groups:
+                    groups.append(row[fieldname])
+                    self.inventory.add_group(row[fieldname])
+                    self.inventory.add_child('all', row[fieldname])
+            # todo Реализовать Hosts in multiple groups
+            # todo Реализовать дочерние группы
+            if len(group_temp) > 1:
+                raise AnsibleParserError('В данной версии не реализована поддержка '
+                                         'размещения хоста в нескольких группах')
+
+            self.inventory.add_host(row[self.__cmdb_fieldset['host_field']], group=group_temp[0])
+            for varname in self.__cmdb_fieldset['hostvars']:
+                self.inventory.set_variable(row[self.__cmdb_fieldset['host_field']], varname, row[varname])
+
+
         cmdb.close()
-        #self.inventory.add_host()
 

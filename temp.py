@@ -1,5 +1,6 @@
 import yaml
 import pprint
+
 default_conf = {
  'config':
      {'host': 'localhost',
@@ -19,7 +20,7 @@ default_conf = {
 }
 
 with open('cmdb.yaml') as f:
-    load_conf = yaml.load(f, Loader=yaml.FullLoader)
+    load_conf = yaml.load(f)
 #pprint.pprint(load_conf)
 
 for key in load_conf:

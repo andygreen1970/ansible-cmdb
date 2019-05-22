@@ -12,7 +12,7 @@ class ConnError(Exception):
 
 class Cmdb:
 
-    def __init__(self, config=None, where='', fields=None):
+    def __init__(self, config=None, fields=None):
         # todo Возможно, надо сформировать error_msg
         # todo Заблокировать get и set item
         self.__config = {
@@ -21,9 +21,10 @@ class Cmdb:
             'port': '3306',
             'user': 'root',
             'password': '',
-            'view': 'otrs.CMDB_Servers'
+            'view': None,
+            'where': None
             }
-
+        # todo Проверить сам config
         for key in config:
 
             if key.lower().strip() in self.__config:
@@ -68,9 +69,8 @@ class Cmdb:
                         raise Exception("Поле {} отсутствует в CMDB.".format(str(field)))
 
                 self.__SQL = self.__SQL[0:-2] + ' FROM ' + self.__view
-
-                if where:
-                    self.__SQL += 'WHERE={}'.format(where)
+                if self.__config['where']:
+                    self.__SQL += ' WHERE={}'.format(self.__config['where'])
                     # todo Проверить синтаксис where
                 self.__SQL += ';'
                 self.__fields = list(fields)
@@ -111,4 +111,3 @@ class Cmdb:
 
     def __del__(self):
         self.close()
-

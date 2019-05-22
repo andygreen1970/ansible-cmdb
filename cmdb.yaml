@@ -1,23 +1,13 @@
-Config: {
-  type: MYSQL,
-  host: localhost,
-  port: 3306,
-  user: root,
-  password: '',
-  view: otrs.CMDB_Servers
-}
-HostField: Name
-where: ''
-groups: [
-   Role,
-  Class
-  ]
-vars: {
-  host: [
-    'RAMcount',
-    'CPUcount',
-    'IP'
-    ],
-  group: [
-    'Landscape']
-  }
+plugin: cmdb
+
+#type: MYSQL
+#host: localhost
+#port: 3306
+#user: root
+password: gre10041970
+view: otrs.CMDB_Servers
+host_field: Name
+#where:
+groups: [Class]
+hostvars: [RAMcount, CPUcount]
+groupvars: [Role]
