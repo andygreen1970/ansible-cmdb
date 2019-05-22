@@ -1,31 +1,33 @@
 import yaml
 import pprint
-test =[
-    {'name': 'cmdb'},
-    {'confg':
-         {
-             'host': 'localhost',
-             'port': '3606'
+default_conf = {
+ 'config':
+     {'host': 'localhost',
+      'password': '',
+      'port': 3306,
+      'type': 'MYSQL',
+      'user': 'root',
+      'view': 'otrs.CMDB_Servers'
+      },
+ 'hostfield': '',
+ 'where': '',
+ 'groups': [],
+ 'vars': {
+            'group': [],
+            'host': []
          }
-     },
-    {'host_field': 'name'},
-    {'groups':
-        ['g1', 'g2']
-     },
-    {'vars':
-            ['v1', 'v2']
-     }
-]
-def f(d, step=None):
-    if not step:
-        temp_keys = list(d.keys)
-        temp_value = list()
-        temp_dict = {key for key in d.keys}
-        step = 1
-    if type(d) == dict:
-        temp = temp.keys()
+}
 
-#with open('cmdb.yaml') as f:
-#    test = yaml.load(f)
-#pprint.pprint(test)
-#print(yaml.dump(test, default_flow_style=False))
+with open('cmdb.yaml') as f:
+    load_conf = yaml.load(f, Loader=yaml.FullLoader)
+#pprint.pprint(load_conf)
+
+for key in load_conf:
+    pkey = str(key).lower().strip()
+    if (pkey in default_conf) and isinstance(load_conf[key], type(default_conf[pkey])):
+        print(key, pkey, load_conf[key])
+    else:
+            raise Exception('Error {}={}'.format(key, load_conf[key]))
+
+#pprint.pprint(default_conf)
+#print(yaml.dump(load_conf, default_flow_style=False))
