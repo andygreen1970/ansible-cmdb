@@ -8,6 +8,6 @@ password: gre10041970
 view: otrs.CMDB_Servers
 host_field: Name
 #where:
-groups: [Class]
+groups: [Landscape, Class]
 hostvars: [RAMcount, CPUcount]
 groupvars: [Role]

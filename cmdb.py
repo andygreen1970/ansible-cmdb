@@ -125,23 +125,34 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
         cmdb = connector.Cmdb(config=self.__cmdb_config, fields=set(fields))
 
-        groups = list()
+        root_name = self.__cmdb_fieldset['groups'][0]
+        root_groups = dict()
+
+        child_names = self.__cmdb_fieldset['groups'][1:]
+        child_groups = list()
 
         for row in cmdb:
-            group_temp = list()
-            for fieldname in self.__cmdb_fieldset['groups']:
-                group_temp.append(row[fieldname])
-                if row[fieldname] not in groups:
-                    groups.append(row[fieldname])
-                    self.inventory.add_group(row[fieldname])
-                    self.inventory.add_child('all', row[fieldname])
-            # todo Реализовать Hosts in multiple groups
-            # todo Реализовать дочерние группы
-            if len(group_temp) > 1:
-                raise AnsibleParserError('В данной версии не реализована поддержка '
-                                         'размещения хоста в нескольких группах')
 
-            self.inventory.add_host(row[self.__cmdb_fieldset['host_field']], group=group_temp[0])
+
+            if (row[root_name] not in root_groups) and row[root_name]:
+                root_groups[row[root_name]] = list()
+                self.inventory.add_group(row[root_name])
+            self.inventory.add_host(row[self.__cmdb_fieldset['host_field']], group=row[root_name])
+
+            for child_name in child_names:
+                if (row[child_name] not in root_groups[row[root_name]]) and row[child_name]:
+                    root_groups[row[root_name]].append(row[child_name])
+                    self.inventory.add_group(row[child_name])
+
+                if row[child_name] and row[root_name]:
+                    self.inventory.add_child(row[root_name], row[child_name])
+                self.inventory.add_host(row[self.__cmdb_fieldset['host_field']], group=row[child_name])
+
+            # todo Реализовать Hosts in multiple groups
+
+
+
+
             for varname in self.__cmdb_fieldset['hostvars']:
                 self.inventory.set_variable(row[self.__cmdb_fieldset['host_field']], varname, row[varname])
 
