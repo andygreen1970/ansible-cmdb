@@ -49,7 +49,23 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
         # todo Добавить настройку класса Cmdb
         super(InventoryModule, self).__init__()
-
+        self._yaml = {'config':
+                          {'host': 'localhost',
+                           'password': None,
+                           'port': 3306,
+                           'type': 'MYSQL',
+                           'user': 'root',
+                           'view': 'otrs.CMDB_Servers'
+                          },
+                      'host_field': None,
+                      'where': None,
+                      'groups': ['Role', 'Class'],
+                      'vars':
+                          {
+                            'group': [],
+                            'host': []
+                          }
+                      }
     def verify_file(self, path):
 
         valid = False
@@ -61,40 +77,20 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
         return valid
 
-    # todo Лучше использовать встроенные методы из ansible (они наверняка есть)
-    @staticmethod
-    def option2dict(option):
-        temp = {}
-        for line in option:
-            for key in line:
-                if key in temp:
-                    raise connector.ParserError("Дублирующийся параметр config: {}.".format(key))
-                temp[str(key)] = str(line[key])
-        return temp
-
-    @staticmethod
-    def option2list(option):
-        temp = []
-        for line in option:
-            temp.append(str(line))
-        return temp
-
     def parse(self, inventory, loader, path, cache=False):
         # todo Сделать управление кэшированием
         super(InventoryModule, self).parse(inventory, loader, path, cache=cache)
 
         self._read_config_data(path)
 
+        for option in self._yaml:
+            try:
+                self._yaml[option] = self.get_option(option)
+            except IndexError:
+
+
         groups = InventoryModule.option2list(self.get_option('groups'))
         vars = InventoryModule.option2dict(self.get_option('vars'))
-
-        # todo Как то криво выглядит. Надо доработать
-        for key in vars:
-            vars[key] = vars[key][1:-1].split(',')
-            i =0
-            for value in vars[key]:
-                vars[key][i] = value.strip().strip('\'')
-                i += 1
 
         fields = vars['group']+vars['host']+groups
         fields.append(self.get_option('host_field'))

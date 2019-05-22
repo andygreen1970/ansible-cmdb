@@ -1,20 +1,24 @@
 plugin: 'cmdb'
-config:
-  - type: 'MYSQL'
-  - host: 'localhost'
-  - port: '3306'
-  - user: 'root'
-  - password: ''
-  - view: 'otrs.CMDB_Servers'
-host_field: 'Name'
+config: {
+  type: MYSQL,
+  host: localhost,
+  port: 3306,
+  user: root,
+  password: '',
+  view: otrs.CMDB_Servers
+}
+host_field: Name
 where: ''
-groups:
-  - 'Role'
-  - 'Class'
-vars:
-  - host:
-    - 'RAMcount'
-    - 'CPUcount'
-    - 'IP'
-  - group:
-      - 'Landscape'
+groups: [
+   Role,
+  Class
+  ]
+vars: {
+  host: [
+    'RAMcount',
+    'CPUcount',
+    'IP'
+    ],
+  group: [
+    'Landscape']
+  }

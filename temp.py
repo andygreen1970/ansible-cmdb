@@ -1,45 +1,31 @@
-from __future__ import (absolute_import, division, print_function)
+import yaml
+import pprint
+test =[
+    {'name': 'cmdb'},
+    {'confg':
+         {
+             'host': 'localhost',
+             'port': '3606'
+         }
+     },
+    {'host_field': 'name'},
+    {'groups':
+        ['g1', 'g2']
+     },
+    {'vars':
+            ['v1', 'v2']
+     }
+]
+def f(d, step=None):
+    if not step:
+        temp_keys = list(d.keys)
+        temp_value = list()
+        temp_dict = {key for key in d.keys}
+        step = 1
+    if type(d) == dict:
+        temp = temp.keys()
 
-__metaclass__ = type
-
-DOCUMENTATION = '''
-
-'''
-
-EXAMPLE = '''
-
-'''
-
-# import connector
-import os
-from ansible import constants as C
-from ansible.errors import AnsibleError
-from ansible.module_utils._text import to_native
-from ansible.plugins.inventory import BaseInventoryPlugin, Constructable, Cacheable
-
-
-class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
-    NAME = 'cmdb'
-
-    def __init__(self):
-        super(InventoryModule, self).__init__()
-
-    def verify_file(self, path):
-
-        valid = False
-
-        if super(InventoryModule, self).verify_file(path):
-            file_name, ext = os.path.splitext(path)
-
-            if not ext or ext in C.YAML_FILENAME_EXTENSIONS:
-                valid = True
-
-        return valid
-
-    def parse(self, inventory, loader, path, cache=False):
-
-        super(InventoryModule, self).parse(inventory, loader, path, cache=cache)
-        self._read_config_data(path)
-        # addr = self._options['address']
-        self.inventory.add_host('host-{}'.format(len(self._options)))
-        self.inventory.add_host('host-{}'.format(loader))
+#with open('cmdb.yaml') as f:
+#    test = yaml.load(f)
+#pprint.pprint(test)
+#print(yaml.dump(test, default_flow_style=False))
