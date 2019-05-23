@@ -1,55 +1,51 @@
-from __future__ import (absolute_import, division, print_function)
-__metaclass__ = type
-
 DOCUMENTATION = '''
     name: cmdb
     plugin_type: inventory
-    version_added: "0.1a"
-    short_description: Uses CMDB to find hosts to target
+    version_added: "0.2a"
+    short_description: Использование CMDB для создания целеей Ansible
     description:
-        - Uses a YAML configuration file with a valid YAML extension. Uses CMDB to find hosts to target
-    extends_documentation_fragment:
+        - Использование CMDB для создания целеей Ansible:
       - constructed
       - inventory_cache
     requirements:
-      - MYSQL (or other) connector installed
+      - MYSQL или другой connector поддерживающий аналогичные методы доступа к данным
     options:
         plugin:
             description: token that ensures this is a source file for the 'cmdb' plugin.
             required: True
             choices: ['cmdb']
         host_field:
-            description: Host field name to ansible target.
+            description: Имя поля CMDB, содержащее имя хоста
             required: True
         type:
-            description: CMDB database type.
+            description: Тип CMDB
             default: MYSQL
             choices: ['MYSQL']
         host:
-            description: CMDB database host.
+            description: Адрес или имя хоста CMDB
             default: localhost
         port:
-            description: CMDB database port.
+            description: Порт, на котором CMDB ожидает запросы
             default: 3306
             type: string
         user:
-            description: CMDB database user.
+            description: Пользователь CMDB
             default: root
         password:
-            description: CMDB database password.
+            description: Пароль для доступа кCMDB
             default: ''
         view:
-            description: CMDB database dataset.
+            description: Имя набора данных CMDB, содержащего необходимую информацию в формате DB.DATASET
             required: True
         where:
-            description: Filter for SQL format.
+            description: Фильтр для отбора данных в формате MYSQL WHERE
             default: ''
         groups:
-            description: Ansible host group list.
+            description: Список имен полей, определяющий группы хостов
         groupvars:
-            description: Field list for group vars.
+            description: Список полей, определеющий переменные групп для Ansible
         hostvars:
-            description: Field list for host vars.
+            description: Список полей, определеющий переменные хостов для Ansible
 '''
 
 
@@ -133,7 +129,6 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
         for row in cmdb:
 
-
             if (row[root_name] not in root_groups) and row[root_name]:
                 root_groups[row[root_name]] = list()
                 self.inventory.add_group(row[root_name])
@@ -149,13 +144,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                 self.inventory.add_host(row[self.__cmdb_fieldset['host_field']], group=row[child_name])
 
             # todo Реализовать Hosts in multiple groups
-
-
-
-
+            # todo Не забыть добавить groupvars, если это возможно
             for varname in self.__cmdb_fieldset['hostvars']:
                 self.inventory.set_variable(row[self.__cmdb_fieldset['host_field']], varname, row[varname])
-
 
         cmdb.close()
 

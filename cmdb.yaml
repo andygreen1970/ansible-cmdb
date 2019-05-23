@@ -1,13 +1,13 @@
-plugin: cmdb
+plugin: cmdb                   #Имя plugin`a [required]
 
-#type: MYSQL
-#host: localhost
-#port: 3306
-#user: root
-password: gre10041970
-view: otrs.CMDB_Servers
-host_field: Name
-#where:
-groups: [Landscape, Class]
-hostvars: [RAMcount, CPUcount]
-groupvars: [Role]
+type: MYSQL                    #Тип CMDB (mysql? REST или др.)
+host: localhost                #Адрес или имя хоста CMDB
+port: 3306                     #Порт, на котором CMDB ожидает запросы
+user: root                     #Пользователь CMDB
+password: 'password'           #Пароль для доступа к CMDB [default: '']
+view: otrs.CMDB_Servers        #Имя набора данных CMDB, содержащего необходимую информацию, в формате DB.DATASET [required]
+host_field: Name               #Имя поля CMDB, содержащее имя хоста Ansible inventory [required]
+#where:                        #Фильтр для отбора данных в формате MYSQL WHERE
+groups: [Landscape, Class]     #Список имен полей, определяющий группы хостов для Ansible [default: []]
+hostvars: [RAMcount, CPUcount] #Список полей, определеющий переменные групп для Ansible [default: []]
+groupvars: [Role]              #Список полей, определеющий переменные хостов для Ansible [default: []]
